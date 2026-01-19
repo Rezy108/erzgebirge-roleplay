@@ -1,0 +1,50 @@
+export default function RegelnPage() {
+  const regeln = [
+    {
+      title: "§1 Allgemeines Verhalten",
+      text: "Respektvoller Umgang mit allen Spielern. Kein RDM, kein VDM, kein Toxic-Verhalten.",
+    },
+    {
+      title: "§2 Roleplay Pflicht",
+      text: "Realistisches Midcore-RP. Keine Actionfilm-Szenen, kein Troll-RP.",
+    },
+    {
+      title: "§3 Metagaming",
+      text: "Infos aus Discord, Streams oder OOC dürfen nicht im RP genutzt werden.",
+    },
+    {
+      title: "§4 Fail-RP",
+      text: "Angst vor Schmerz und Tod ist Pflicht. Dein Leben ist wertvoll.",
+    },
+    {
+      title: "§5 Support",
+      text: "Bei Problemen Support kontaktieren – nicht im RP eskalieren.",
+    },
+  ];
+
+  return (
+    <main className="mx-auto max-w-5xl px-6 py-12">
+      <h1 className="text-4xl font-bold text-emerald-400">
+        Erzgebirge Roleplay – Regelwerk
+      </h1>
+
+      <p className="mt-3 text-white/70">
+        Diese Regeln sind verbindlich für alle Spieler auf Erzgebirge Roleplay.
+      </p>
+
+      <div className="mt-8 space-y-4">
+        {regeln.map((r) => (
+          <div
+            key={r.title}
+            className="rounded-2xl bg-white/5 p-6 ring-1 ring-white/10"
+          >
+            <h2 className="text-lg font-semibold text-emerald-300">
+              {r.title}
+            </h2>
+            <p className="mt-2 text-white/70">{r.text}</p>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}

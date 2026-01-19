@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Track {
+  SUPPORTER
+  ENTWICKLUNG
+  HIGH_TEAM
+}
+
+enum ApplicationStatus {
+  EINGEGANGEN
+  IN_BEARBEITUNG
+  ANGENOMMEN
+  ABGELEHNT
+}
+
+model User {
+  id          String   @id @default(cuid())
+  discordId   String   @unique
+  discordName String
+  avatarUrl   String?
+  createdAt   DateTime @default(now())
+
+  applications Application[]
+}
+
+model Application {
+  id        String            @id @default(cuid())
+  userId    String
+  track     Track
+  status    ApplicationStatus @default(EINGEGANGEN)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user    User               @relation(fields: [userId], references: [id])
+  answers ApplicationAnswer[]
+}
+
+model ApplicationAnswer {
+  id            String      @id @default(cuid())
+  applicationId String
+  questionKey   String
+  answer        String
+
+  application   Application @relation(fields: [applicationId], references: [id])
+
+  @@index([applicationId])
+}
