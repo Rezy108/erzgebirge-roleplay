@@ -1,91 +1,113 @@
 "use client";
 
+import { useState } from "react";
 import { signIn, useSession } from "next-auth/react";
-import Link from "next/link";
 
 export default function ApplyPage() {
   const { data: session, status } = useSession();
+  const [team, setTeam] = useState<string | null>(null);
+
+  if (status === "loading") {
+    return <div className="p-10 text-white">Lädt…</div>;
+  }
+
+  if (!session) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#050806] text-white">
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-8 text-center max-w-md">
+          <h1 className="text-2xl font-bold mb-4">Teambewerbung</h1>
+          <p className="text-white/70 mb-6">
+            Bitte melde dich mit Discord an, um dich zu bewerben.
+          </p>
+          <button
+            onClick={() => signIn("discord")}
+            className="w-full rounded-xl bg-emerald-500 py-3 font-semibold text-black hover:bg-emerald-400"
+          >
+            Mit Discord anmelden
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-[#050806] text-white">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-52 left-1/2 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-emerald-400/12 blur-3xl" />
-        <div className="absolute -bottom-52 left-10 h-[520px] w-[520px] rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="absolute -bottom-52 right-10 h-[520px] w-[520px] rounded-full bg-emerald-400/10 blur-3xl" />
-      </div>
+    <main className="min-h-screen bg-[#050806] text-white px-6 py-20">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Teambewerbung</h1>
 
-      <div className="relative mx-auto max-w-6xl px-6 py-12">
-        <div className="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10 backdrop-blur">
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-400/10 px-3 py-1 text-xs text-emerald-200 ring-1 ring-emerald-300/20">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Team Bewerbung
+        {!team ? (
+          <div className="grid md:grid-cols-3 gap-4">
+            <TeamCard title="Supporter" onClick={() => setTeam("Supporter")} />
+            <TeamCard title="Entwicklung" onClick={() => setTeam("Entwicklung")} />
+            <TeamCard title="High-Team" onClick={() => setTeam("High-Team")} />
           </div>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert("Bewerbung abgesendet (Demo)");
+            }}
+            className="mt-8 rounded-2xl bg-white/5 border border-white/10 p-6 space-y-4"
+          >
+            <button
+              type="button"
+              onClick={() => setTeam(null)}
+              className="text-sm text-emerald-300 hover:underline"
+            >
+              ← Zurück
+            </button>
 
-          <h1 className="mt-4 text-4xl font-bold">
-            Erzgebirge <span className="text-emerald-200">Roleplay</span>
-          </h1>
-          <p className="mt-3 max-w-2xl text-white/70">
-            Wähle den Bereich, für den du dich bewerben möchtest. Bewerbungen werden über Discord verifiziert.
-          </p>
+            <h2 className="text-xl font-semibold">
+              Bewerbung als {team}
+            </h2>
 
-          {status === "loading" ? (
-            <div className="mt-6 text-white/60">Lädt…</div>
-          ) : !session ? (
-            <div className="mt-6 rounded-2xl bg-black/20 p-6 ring-1 ring-white/10">
-              <div className="text-lg font-semibold">Bitte zuerst einloggen</div>
-              <p className="mt-2 text-sm text-white/70">
-                Damit wir wissen, wer du bist, läuft die Bewerbung über Discord Login.
-              </p>
-              <button
-                onClick={() => signIn("discord")}
-                className="mt-5 rounded-2xl bg-emerald-400 px-5 py-3 text-sm font-semibold text-black hover:bg-emerald-300"
-              >
-                Mit Discord anmelden
-              </button>
-            </div>
-          ) : (
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {[
-                {
-                  key: "supporter",
-                  t: "Supporter",
-                  d: "Spieler helfen, Tickets bearbeiten, freundlich & zuverlässig.",
-                  bullets: ["Kommunikation", "Regeln kennen", "Aktivität"],
-                },
-                {
-                  key: "entwicklung",
-                  t: "Entwicklung",
-                  d: "Scripts, Features, Bugfixes – bring den Server technisch nach vorne.",
-                  bullets: ["Lua/JS/TS", "Sauberer Code", "Teamwork"],
-                },
-                {
-                  key: "high-team",
-                  t: "High-Team",
-                  d: "Organisation, Moderation, Entscheidungen – Verantwortung übernehmen.",
-                  bullets: ["Reife", "Fairness", "Vorbild"],
-                },
-              ].map((c) => (
-                <div key={c.key} className="rounded-2xl bg-black/20 p-6 ring-1 ring-white/10">
-                  <div className="text-lg font-semibold text-emerald-300">{c.t}</div>
-                  <div className="mt-2 text-sm text-white/70">{c.d}</div>
-                  <ul className="mt-4 space-y-1 text-sm text-white/60">
-                    {c.bullets.map((b) => (
-                      <li key={b}>• {b}</li>
-                    ))}
-                  </ul>
+            <Input label="Name / Ingame-Name" />
+            <Input label="Alter" />
+            <Input label="Warum möchtest du ins Team?" textarea />
+            <Input label="Was bringst du mit?" textarea />
 
-                  <Link
-                    href={`/apply/${c.key}`}
-                    className="mt-6 inline-block w-full rounded-2xl bg-emerald-400 px-4 py-2 text-center text-sm font-semibold text-black hover:bg-emerald-300"
-                  >
-                    Bewerbung starten
-                  </Link>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-emerald-500 py-3 font-semibold text-black hover:bg-emerald-400"
+            >
+              Bewerbung absenden
+            </button>
+          </form>
+        )}
       </div>
     </main>
+  );
+}
+
+function TeamCard({ title, onClick }: { title: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition"
+    >
+      <div className="text-xl font-semibold text-emerald-300">{title}</div>
+      <div className="mt-2 text-sm text-white/70">
+        Bewerbe dich als {title}
+      </div>
+    </button>
+  );
+}
+
+function Input({
+  label,
+  textarea,
+}: {
+  label: string;
+  textarea?: boolean;
+}) {
+  return (
+    <label className="block">
+      <span className="text-sm text-white/70">{label}</span>
+      {textarea ? (
+        <textarea className="mt-1 w-full rounded-xl bg-black/40 border border-white/10 p-3" />
+      ) : (
+        <input className="mt-1 w-full rounded-xl bg-black/40 border border-white/10 p-3" />
+      )}
+    </label>
   );
 }
