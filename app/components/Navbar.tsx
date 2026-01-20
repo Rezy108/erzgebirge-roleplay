@@ -1,74 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useSession, signIn, signOut } from "next-auth/react";
 
-const links = [
-  { href: "/", label: "Startseite" },
-  { href: "/regeln", label: "Regeln" },
-  { href: "/news", label: "News" },
-  { href: "/status", label: "Status" },
-  { href: "/apply", label: "Teambewerbung" },
-  {
-    href: "https://discord.gg/erz-rp",
-    label: "Discord",
-    external: true,
-  },
-];
+const publicAdminIds =
+  (process.env.NEXT_PUBLIC_ADMIN_DISCORD_IDS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
 export default function Navbar() {
-  const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const discordId = (session?.user as any)?.discordId as string | undefined;
+  const isAdmin = !!discordId && publicAdminIds.includes(discordId);
 
   return (
-    <header className="fixed top-0 z-50 w-full bg-black/60 backdrop-blur-md ring-1 ring-white/10">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Logo + Titel */}
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Erzgebirge Roleplay Logo"
-            width={42}
-            height={42}
-            className="rounded-full ring-2 ring-emerald-400/40"
-          />
-
-          <div className="leading-tight">
-            <div className="font-semibold text-white">
-              Erzgebirge Roleplay
-            </div>
-            <div className="text-xs text-emerald-300/80">
-              Green Theme
-            </div>
-          </div>
+    <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/50 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <Link href="/" className="font-bold">
+          Erzgebirge Roleplay
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {links.map((link) =>
-            link.external ? (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-medium text-white/70 hover:text-emerald-300"
+        <nav className="flex items-center gap-3 text-sm">
+          <Link className="text-white/70 hover:text-white" href="/regeln">Regeln</Link>
+          <Link className="text-white/70 hover:text-white" href="/apply">Teambewerbung</Link>
+          <a className="text-white/70 hover:text-white" href="https://discord.gg/erz-rp" target="_blank" rel="noreferrer">
+            Discord
+          </a>
+
+          {status !== "loading" && !session && (
+            <button
+              onClick={() => signIn("discord")}
+              className="ml-2 rounded-xl bg-emerald-500 px-3 py-2 font-semibold text-black hover:bg-emerald-400"
+            >
+              Discord Login
+            </button>
+          )}
+
+          {status !== "loading" && session && (
+            <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="ml-2 rounded-xl bg-emerald-500/20 px-3 py-2 font-semibold text-emerald-200 hover:bg-emerald-500/30"
+                >
+                  Admin
+                </Link>
+              )}
+
+              <button
+                onClick={() => signOut()}
+                className="rounded-xl bg-white/10 px-3 py-2 hover:bg-white/15"
               >
-                {link.label}
-              </a>
-            ) : (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={`text-sm font-medium transition ${
-                  pathname === link.href
-                    ? "text-emerald-300"
-                    : "text-white/70 hover:text-emerald-300"
-                }`}
-              >
-                {link.label}
-              </Link>
-            )
+                Logout
+              </button>
+            </>
           )}
         </nav>
       </div>

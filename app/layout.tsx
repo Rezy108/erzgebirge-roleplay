@@ -1,15 +1,10 @@
-﻿import "./globals.css";
-import Providers from "./providers";
-import Navbar from "./components/Navbar";
+﻿import Providers from "./providers";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
-      <body className="bg-[#050806] text-white">
-        <Providers>
-          <Navbar />
-          {children}
-        </Providers>
+      <body>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
